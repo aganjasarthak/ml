@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Network Calculator</title>
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: inline-block;
+            width: 80px;
+        }
+        .form-group input {
+            padding: 5px;
+            width: 150px;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+        .loading {
+            display: none;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Neural Network Calculator</h2>
+        <form id="inputForm">
+            <div id="inputFields"></div>
+            <button type="submit" id="calculateBtn">Calculate</button>
+        </form>
+
+        <div id="loading" class="loading">Processing...</div>
+        <div id="error" class="error"></div>
+        <div id="success" class="success"></div>
+
+        <h3>Result:</h3>
+        <p id="result"></p>
+
+        <h3>Polynomial Features (X_poly):</h3>
+        <div id="output"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.4.4/math.js"></script>
+    <script>
+        // Configuration
+        const CONFIG = {
+            NUM_VARIABLES: 8,
+            NUM_LAYERS: 11,
+            SUBTRACT_ARRAY: [303.6219, 80.7154, 52.9338, 179.9620, 7.2034, 963.1915, 764.0184, 59.4017],
+            DIVIDE_ARRAY: [106.5748, 85.4648, 61.6608, 23.2872, 6.1893, 79.1757, 83.5207, 70.1536]
+        };
+
+        // State management
+        let X_poly = [];
+
+        // DOM Elements
+        const elements = {
+            form: document.getElementById('inputForm'),
+            result: document.getElementById('result'),
+            output: document.getElementById('output'),
+            error: document.getElementById('error'),
+            success: document.getElementById('success'),
+            loading: document.getElementById('loading'),
+            calculateBtn: document.getElementById('calculateBtn')
+        };
+
+        // Initialize form fields
+        function initializeForm() {
+            const inputFields = document.getElementById('inputFields');
+            for (let i = 1; i <= CONFIG.NUM_VARIABLES; i++) {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.htmlFor = `var${i}`;
+                label.textContent = `Var${i}:`;
+                
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.id = `var${i}`;
+                input.name = `var${i}`;
+                input.required = true;
+                input.step = 'any';
+                
+                formGroup.appendChild(label);
+                formGroup.appendChild(input);
+                inputFields.appendChild(formGroup);
+            }
+        }
+
+        // Validate input values
+        function validateInputs(values) {
+            return values.every(value => !isNaN(value) && isFinite(value));
+        }
+
+        // Calculate normalized row vector
+        function calculateNormalizedVector(inputValues) {
+            return inputValues.map((value, index) => {
+                return ((value - CONFIG.SUBTRACT_ARRAY[index]) / CONFIG.DIVIDE_ARRAY[index]);
+            });
+        }
+
+        // Generate polynomial features
+        function generatePolynomialFeatures(resultArray, degree = 2) {
+            const X_poly = [[]]; // Initialize as a 2D matrix with one row
+
+// Add the bias term (1) as the first element
+X_poly[0].push(1);
+
+// Add polynomial terms up to the specified degree (which is 2 in this case)
+for (let j = 0; j < resultArray.length; j++) {
+    for (let d = 1; d <= degree; d++) {
+        X_poly[0].push(Math.pow(resultArray[j], d));
+    }
+}
+
+// Add interaction terms between different elements
+for (let j = 0; j < resultArray.length; j++) {
+    for (let k = j + 1; k < resultArray.length; k++) {
+        X_poly[0].push(resultArray[j] * resultArray[k]);
+    }
+}
+
+// Ensure X_poly has the expected number of elements for verification (optional)
+const expectedElements = 1 + resultArray.length * degree + (resultArray.length * (resultArray.length - 1)) / 2;
+if (X_poly[0].length !== expectedElements) {
+    throw new Error(`X_poly must have ${expectedElements} elements, but has ${X_poly[0].length}. Adjust the logic or input.`);
+}
+
+return X_poly;
+}
+
+
+        // Process neural network
+        async function processNeuralNetwork(X_poly) {
+            try {
+                const response = await fetch('data.json');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch network data');
+                }
+
+                const data = await response.json();
+                const { W, b } = data;
+             
+
+                // Validate network structure
+                if (!Array.isArray(W) || !Array.isArray(b) || 
+                    W.length !== CONFIG.NUM_LAYERS || b.length !== CONFIG.NUM_LAYERS) {
+                    throw new Error('Invalid neural network structure');
+                }
+   
+
+                // Initialize first activation with input
+                
+   
+
+// Forward propagation through all layers
+
+let a = X_poly;  // Initial input
+console.log('Initial X_poly dimensions:', [X_poly.length, X_poly[0].length]);
+
+for (let i = 0; i < 11; i++) {
+    console.log(`\nLayer ${i}:`);
+    console.log('a dim:', [a.length, a[0].length]);
+    console.log('W dim:', [W[i].length, W[i][0].length]);
+    console.log(' b dim:', b[i].length);
+
+    // Matrix multiplication
+   const multiplication = math.multiply(a, W[i]);
+    console.log('multiplyyyyy:', 
+                [multiplication.length, multiplication[0].length]);
+
+    // Add bias
+    let bRepeated = Array(a.length).fill(b[i]);
+
+    const z = math.add(multiplication, bRepeated);
+    console.log('After bias addition dimensions:', 
+                [z.length, z[0].length]);
+
+    if (i === 10) {
+        a = z;
+    } else {
+        a = math.map(z, value => Math.max(0, value));
+    }
+}
+const y_pred_finalt = a*12.8811+44.2186;
+console.log('a');
+console.log(y_pred_finalt);
+
+                return a;
+            } catch (error) {
+                throw new Error(`Neural network processing failed: ${error.message}`);
+            }
+        }
+
+        // Main calculation function
+        async function handleCalculation(event) {
+            event.preventDefault();
+            
+            elements.error.textContent = '';
+            elements.success.textContent = '';
+            elements.loading.style.display = 'block';
+            elements.calculateBtn.disabled = true;
+
+            try {
+                // Get and validate inputs
+                const inputValues = Array.from({ length: CONFIG.NUM_VARIABLES }, 
+                    (_, i) => parseFloat(document.getElementById(`var${i + 1}`).value));
+
+                if (!validateInputs(inputValues)) {
+                    throw new Error('Please enter valid numbers for all fields');
+                }
+
+                // Calculate normalized vector
+                const normalizedVector = calculateNormalizedVector(inputValues);
+                elements.result.textContent = `[ ${normalizedVector.map(v => v.toFixed(4)).join(', ')} ]`;
+
+                // Generate polynomial features
+                X_poly = generatePolynomialFeatures(normalizedVector);
+                console.log(X_poly);
+                console.log('bigreko');
+
+                  
+                                        let totalElements = X_poly.reduce((sum, row) => sum + row.length, 0);
+                                        console.log(totalElements); // This will give you the total number of elements in X_poly
+                                        // Define a new matrix of size 1x45
+                                            // Define a new 2D matrix of size 1x45
+                                            
+                                    X_mini=[
+    [1, 0.669746358302946, 0.448560184460057, -0.944428713726893, 0.891945595311833, -0.858467068030285, 0.736965706892514, 0.259285679642027, 0.0672290636674281, -1.16383817335812, 
+     1.35451929376557, 0.944842031522081, 0.892726464530773, -0.0720586453649226, 0.00519244837182768, -0.746956915067188, 0.557944632966691, -0.632527691695321, -0.574955192536291, 0.173655639700352,
+     -0.779476378260555, 0.632804509783471, -0.0482610153174003, -0.500271673675452, 0.810760948836739, -0.244876840912123, 1.09916218905087, -0.892335944505503, 0.0680542537548962, 0.705447558506312, 
+     -0.222588217184531, 0.999116744344471, -0.811115768552539, 0.0618599740126592, 0.641237912822676, -0.301766571772497, 0.244984008297557, -0.0186837748375278, -0.193675231386508, -1.09964322407864, 
+     0.0838646021961724, 0.869336971609016, -0.0680840368753227, -0.705756289091549, 0.0538247034457031]
+];
+ console.log(X_mini);
+ console.log('find mini');
+
+
+      
+
+                        let new_mat = new Array(1); // Create an array with 1 row
+                        new_mat[0] = new Array(45);
+                        // Initialize the first row with 45 elements
+                        for (let i = 0; i < 45; i++) {
+                                new_mat[0][i] = i+1; // Set values 1, 2, ..., 45 in the matrix
+                            }
+
+                        // Flatten the matrix (since it's a 1x45 matrix, just access the first row)
+                        let flat_mat = new_mat[0];
+
+                        // Output the matrix as [1, 45]
+                        console.log(flat_mat); // This will print [1, 2, 3, 4, ..., 45]
+
+
+
+                console.log(X_poly);
+              //  elements.output.textContent = `X_poly: [ ${X_poly[0].map(v => v.toFixed(4)).join(', ')} ]`;
+
+                // Process neural network
+                const prediction = await processNeuralNetwork(X_poly);
+                
+                elements.success.textContent = 'Calculation completed successfully!';
+
+            } catch (error) {
+                elements.error.textContent = error.message;
+            } finally {
+                elements.loading.style.display = 'none';
+                elements.calculateBtn.disabled = false;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeForm();
+            elements.form.addEventListener('submit', handleCalculation);
+        });
+    </script>
+</body>
+</html>
