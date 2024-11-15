@@ -44,11 +44,78 @@
         button:disabled {
             background-color: #ccc;
         }
+        body {
+            background-color: #F0F8FF; /* Frost white background */
+            color: #000000; /* Dark text color for readability */
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            font-family: "Garamond", serif;
+        }
+        .form-group input {
+    padding: 5px;
+    width: 150px;
+    margin-left: 40px; /* Increase the space between the label and input */
+}
+h2 {
+    color: navy;
+}
+h3 {
+    color: navy;
+}
+h4 {
+    color: navy;
+}
+h5 {
+    color: navy;
+}
+h6 {
+    color: navy;
+}
+
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h2>Neural Network Calculator</h2>
+        <h2>Neural Network Calculator-Concrete strength prediction</h2>
+        <p>Developed by: Sarthak Aaganja (<a href="mailto:sarthak.aaganja12@gmail.com">sarthak.aaganja12@gmail.com</a>)</p>
+        <p>Civil Engineer , Khwopa College of Engineering</p>
+        
+
+
+        <img src="https://i2.wp.com/cdn-images-1.medium.com/max/550/1*pO5X2c28F1ysJhwnmPsy3Q.gif?w=550&resize=550,400&ssl=1" alt="Neural Network Structure" style="display: block; margin: 20px 0; width: 550px; height: 300px;">
+
+<p>This project involves developing a neural network model to predict the compressive strength of concrete using a dataset sourced from the Machine Learning Repository of the University of California, Irvine (UCI). The dataset, created by I-Cheng Yeh, provides valuable insights into how different components and factors contribute to the compressive strength of concrete.</p>
+
+<h3>Dataset Overview:</h3>
+<ul>
+    <li><strong>Source</strong>: (Validate From here) <a href="https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength" target="_blank">https://archive.ics.uci.edu/dataset/165/concrete+compressive+strength ( UCI Machine learning Repo )</a></li>
+    <li><strong>Creator</strong>: I-Cheng Yeh</li>
+    <li><strong>Description</strong>: The dataset consists of 1,030 instances with 8 input variables (features) and one target output (compressive strength).</li>
+</ul>
+
+<h4>Input Variables:</h4>
+<ul>
+    <li><strong>Cement</strong> (kg/m³) - Continuous</li>
+    <li><strong>Blast Furnace Slag</strong> (kg/m³) - Integer</li>
+    <li><strong>Fly Ash</strong> (kg/m³) - Continuous</li>
+    <li><strong>Water</strong> (kg/m³) - Continuous</li>
+    <li><strong>Superplasticizer</strong> (kg/m³) - Continuous</li>
+    <li><strong>Coarse Aggregate</strong> (kg/m³) - Continuous</li>
+    <li><strong>Fine Aggregate</strong> (kg/m³) - Continuous</li>
+    <li><strong>Age</strong> (days) - Continuous</li>
+</ul>
+<p>All features are measured in kg/m³ except for <strong>Age</strong>, which is measured in days.</p>
+
+<h3>Project Description:</h3>
+<p>The neural network was trained using a dataset with 25,000 epochs to ensure thorough learning and convergence. The network architecture was robust, featuring over 500 neurons to capture the complexity of the input-output relationships.</p>
+<p>The neural network functions by passing the input data through matrix neurons, followed by a ReLU activation function after each layer. This choice of activation function helps introduce non-linearity into the model, enabling it to learn complex patterns in the data effectively.</p>
+
+
+<p>This project utilizes deep learning to predict concrete compressive strength, focusing on the relationships between various input features and the target outcome. The neural network was developed using the UCI dataset, chosen for its comprehensive real-world data on concrete mixtures. By training with 25,000 epochs and using an architecture of over 500 neurons, the model achieves high accuracy in predicting concrete strength based on its composition and age.</p>
+<p>R(Squared)=0.9466</p>
+
+
         <form id="inputForm">
             <div id="inputFields"></div>
             <button type="submit" id="calculateBtn">Calculate</button>
@@ -61,7 +128,7 @@
         <h3>Result:</h3>
         <p id="result"></p>
 
-        <h3>Polynomial Features (X_poly):</h3>
+        <h3>Predicted Strength (Please Validate) (MPa):</h3>
         <div id="output"></div>
     </div>
 
@@ -91,27 +158,75 @@
 
         // Initialize form fields
         function initializeForm() {
-            const inputFields = document.getElementById('inputFields');
-            for (let i = 1; i <= CONFIG.NUM_VARIABLES; i++) {
-                const formGroup = document.createElement('div');
-                formGroup.className = 'form-group';
-                
-                const label = document.createElement('label');
-                label.htmlFor = `var${i}`;
-                label.textContent = `Var${i}:`;
-                
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.id = `var${i}`;
-                input.name = `var${i}`;
-                input.required = true;
-                input.step = 'any';
-                
-                formGroup.appendChild(label);
-                formGroup.appendChild(input);
-                inputFields.appendChild(formGroup);
-            }
-        }
+    const inputFields = document.getElementById('inputFields');
+    const labels = [
+        'Cement',
+        'Blast Furnace Slag',
+        'Fly Ash',
+        'Water',
+        'Superplasticizer',
+        'Coarse Aggregate',
+        'Fine Aggregate',
+        'Age'
+    ];
+    const units = [
+        '(kg/m³)',
+        '(kg/m³)',
+        '(kg/m³)',
+        '(kg/m³)',
+        '(kg/m³)',
+        '(kg/m³)',
+        '(kg/m³)',
+        '(days)'
+    ];
+
+    const placeholders = [
+        '108.3-540',
+        '0-359.4',
+        '0-187',
+        '121.8-247',
+        '0-32.2',
+        '801-1145',
+        '594-992.6',
+        '3-365'
+    ];
+
+
+    for (let i = 0; i < labels.length; i++) {
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        
+        // Create label for the input field
+        const label = document.createElement('label');
+        label.htmlFor = `var${i + 1}`;
+        label.textContent = labels[i] + ':';
+        
+        // Create input field
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = `var${i + 1}`;
+        input.name = `var${i + 1}`;
+        input.required = true;
+        input.step = 'any';
+        input.placeholder = placeholders[i];
+
+        // Create unit span
+        const unit = document.createElement('span');
+        unit.className = 'unit';
+        unit.textContent = units[i];
+        
+        // Create a wrapper div for the input and the unit
+        const inputWrapper = document.createElement('div');
+        inputWrapper.className = 'input-wrapper';
+        inputWrapper.appendChild(input);
+        inputWrapper.appendChild(unit);  // Add unit next to input
+        
+        formGroup.appendChild(label);
+        formGroup.appendChild(inputWrapper);  // Append the wrapper instead of just the input
+        inputFields.appendChild(formGroup);
+    }
+} //ini form end 
+
 
         // Validate input values
         function validateInputs(values) {
@@ -284,6 +399,8 @@ console.log(y_pred_finalt);
 
                 // Process neural network
                 const prediction = await processNeuralNetwork(X_poly);
+                let pre=prediction*12.8811+44.2186;
+               elements.output.textContent = `Strength in MPa ${pre}`;
                 
                 elements.success.textContent = 'Calculation completed successfully!';
 
